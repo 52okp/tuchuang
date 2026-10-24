@@ -63,11 +63,11 @@ DB_DATABASE=库名
 DB_USERNAME=数据库用户
 DB_PASSWORD=数据库密码
 
-# 统一更新服务（可选，不用在线升级可不填）
-UPDATES_BASE_URL=https://app.52okp.com
-UPDATES_PROJECT=tuchuang
+# 在线升级（可选）：更新源自备，不填不影响正常使用
+UPDATES_BASE_URL=
+UPDATES_PROJECT=
 UPDATES_CHANNEL=stable
-UPDATES_TOKEN=                   # 64 位项目令牌，只放服务器环境变量
+UPDATES_TOKEN=
 ```
 
 ### 6. 初始化
@@ -148,16 +148,15 @@ request_terminate_timeout = 0
 - 后台建议关闭游客上传或从允许后缀里去掉 `svg`（同源内联 XSS 风险，见安全审计报告）
 - `UPDATES_TOKEN` 只放 `.env`，不要进代码仓库或前端
 
-## 四、在线升级（统一更新服务）
+## 四、升级
 
-前提：在 [app.52okp.com](https://app.52okp.com) 注册项目（项目标识 `tuchuang`，绑定 GitHub 仓库 `52okp/tuchuang`），拿到 64 位项目令牌填入 `.env` 的 `UPDATES_TOKEN`。
+两种方式任选：
 
-之后新版本发布流程：
+**在线升级（可选）**：`.env` 里配置自备更新服务的 `UPDATES_BASE_URL` / `UPDATES_PROJECT` / `UPDATES_TOKEN` 后，后台 → 系统设置 → 系统升级 检查更新并一键安装。升级流程内置 SHA-256 完整性校验、安全解压校验、自动备份与失败回滚。未配置或无令牌时此功能不可用，不影响其他功能。
 
-1. 改 `config/convention.php` 版本号 → 提交推送
-2. 打 tag（`vX.Y.Z`）并推送
-3. 构建 `tuchuang-update.zip` + `update-manifest.json`（ZIP 根目录含 `update-version.json`，manifest 的 sha256/size 必须与 ZIP 精确一致）
-4. GitHub 创建 Release（正式版，不是草稿/预发布）上传两个资产
-5. 更新后台同步该版本
+**手动升级**：从 GitHub [Releases](https://github.com/52okp/tuchuang/releases) 下载新版代码 → 覆盖站点目录（**保留** `.env`、`installed.lock`、`storage/app/uploads`）→ 执行：
 
-站点管理员在 后台 → 系统设置 → 系统升级 里点"检查更新 → 立即安装"即可，升级包含 SHA-256 校验、安全解压校验、失败自动回滚。
+```bash
+php artisan migrate --force
+php artisan optimize:clear
+```

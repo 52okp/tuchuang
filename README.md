@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/52okp/tuchuang)](https://github.com/52okp/tuchuang/releases)
 [![License](https://img.shields.io/badge/license-GPL_V3.0-yellowgreen.svg)](https://github.com/52okp/tuchuang/blob/master/LICENSE)
 
-[安装指南（宝塔面板）](INSTALL-BT.md) &middot; [更新服务规范](https://app.52okp.com/api/spec)
+[安装指南（宝塔面板）](INSTALL-BT.md)
 
 > 本项目在 Lsky Pro 开源版基础上维护，主要改动：
 > - 自动更新迁移到统一更新服务（令牌认证、整包 SHA-256 校验、安全解压、失败回滚）
@@ -34,15 +34,11 @@
 
 详细的宝塔面板部署步骤与常见坑见 **[INSTALL-BT.md](INSTALL-BT.md)**。
 
-### 🔄 在线升级
+### 🔄 升级
 
-通过统一更新服务（[规范文档](https://app.52okp.com/api/spec)）分发版本：
+程序内置在线升级能力（Bearer 令牌认证、清单与整包双重 SHA-256 校验、防路径穿越/符号链接的安全解压、自动备份、失败自动回滚）。更新源通过 `.env` 的 `UPDATES_BASE_URL` / `UPDATES_PROJECT` / `UPDATES_TOKEN` 配置，由部署者自备更新服务与令牌。
 
-1. 在 `.env` 中配置 `UPDATES_BASE_URL` / `UPDATES_PROJECT` / `UPDATES_TOKEN`（令牌仅存放于服务器环境变量）
-2. 后台 → 系统设置 → 系统升级，检查更新并安装
-3. 升级流程包含：Bearer 令牌认证 → 清单与整包双重 SHA-256 校验 → 防路径穿越/符号链接的安全解压 → 自动备份 → 失败自动回滚
-
-版本发布需要：GitHub 正式 Release（`vX.Y.Z`）+ `tuchuang-update.zip` + `update-manifest.json` 两个资产，详见安装指南第四节。
+未配置更新源的部署不影响正常使用，可从 [Releases](https://github.com/52okp/tuchuang/releases) 下载新版整包覆盖站点目录后执行 `php artisan migrate --force` 完成升级。
 
 ### 🧪 测试
 
