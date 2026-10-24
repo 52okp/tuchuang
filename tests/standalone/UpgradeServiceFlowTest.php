@@ -111,8 +111,8 @@ error_reporting(E_ALL);
 
 $GLOBALS['__test_base'] = sys_get_temp_dir().'/tuchuang-upgrade-flow';
 $GLOBALS['__test_config'] = [
-    'upgrades.base_url' => 'https://app.52okp.com',
-    'upgrades.project' => 'tuchuang',
+    'upgrades.base_url' => 'https://update.example.com',
+    'upgrades.project' => 'demoapp',
     'upgrades.channel' => 'stable',
     'upgrades.token' => str_repeat('a', 64),
     'upgrades.max_package_size' => 200 * 1024 * 1024,
@@ -164,7 +164,7 @@ $zipBytes = (function () {
     $tmp = tempnam(sys_get_temp_dir(), 'pkg').'.zip';
     $z = new \ZipArchive();
     $z->open($tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('app/Old.php', '<?php // new version of Old');
     $z->addFromString('app/New.php', '<?php // brand new file');
     $z->close();
@@ -173,7 +173,7 @@ $zipBytes = (function () {
     return $bytes;
 })();
 $manifest = json_encode([
-    'format' => 2, 'product' => 'tuchuang', 'version' => '2.2.0', 'from' => '2.1.0',
+    'format' => 2, 'product' => 'demoapp', 'version' => '2.2.0', 'from' => '2.1.0',
     'package' => 'tuchuang-update.zip', 'size' => strlen($zipBytes),
     'sha256' => hash('sha256', $zipBytes), 'notes' => '# 更新说明',
 ]);
@@ -181,11 +181,11 @@ $release = [
     'id' => $releaseId, 'version' => '2.2.0', 'from' => '2.1.0', 'status' => 'published',
     'notes' => '# 更新说明', 'published_at' => '2026-10-01T00:00:00Z', 'verification' => 'github-sha256',
     'size' => strlen($zipBytes), 'sha256' => hash('sha256', $zipBytes),
-    'download_url' => 'https://app.52okp.com/api/v1/projects/tuchuang/releases/'.$releaseId.'/package',
-    'manifest_url' => 'https://app.52okp.com/api/v1/projects/tuchuang/releases/'.$releaseId.'/manifest',
+    'download_url' => 'https://update.example.com/api/v1/projects/demoapp/releases/'.$releaseId.'/package',
+    'manifest_url' => 'https://update.example.com/api/v1/projects/demoapp/releases/'.$releaseId.'/manifest',
     'assets' => [
-        ['type' => 'zip', 'size' => strlen($zipBytes), 'sha256' => hash('sha256', $zipBytes), 'url' => 'https://app.52okp.com/api/v1/projects/tuchuang/releases/'.$releaseId.'/package'],
-        ['type' => 'manifest', 'size' => strlen($manifest), 'sha256' => hash('sha256', $manifest), 'url' => 'https://app.52okp.com/api/v1/projects/tuchuang/releases/'.$releaseId.'/manifest'],
+        ['type' => 'zip', 'size' => strlen($zipBytes), 'sha256' => hash('sha256', $zipBytes), 'url' => 'https://update.example.com/api/v1/projects/demoapp/releases/'.$releaseId.'/package'],
+        ['type' => 'manifest', 'size' => strlen($manifest), 'sha256' => hash('sha256', $manifest), 'url' => 'https://update.example.com/api/v1/projects/demoapp/releases/'.$releaseId.'/manifest'],
     ],
 ];
 

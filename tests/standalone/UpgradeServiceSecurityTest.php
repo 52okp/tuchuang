@@ -26,8 +26,8 @@ error_reporting(E_ALL);
 
 $GLOBALS['__test_base'] = sys_get_temp_dir().'/tuchuang-upgrade-test';
 $GLOBALS['__test_config'] = [
-    'upgrades.base_url' => 'https://app.52okp.com',
-    'upgrades.project' => 'tuchuang',
+    'upgrades.base_url' => 'https://update.example.com',
+    'upgrades.project' => 'demoapp',
     'upgrades.channel' => 'stable',
     'upgrades.token' => str_repeat('a', 64),
     'upgrades.max_package_size' => 200 * 1024 * 1024,
@@ -94,7 +94,7 @@ expectException(fn () => $call('normalizeVersion', 'abc'), '格式不正确', 'a
 expectException(fn () => $call('normalizeVersion', '1.2.x'), '格式不正确', '1.2.x 拒绝');
 
 echo "== project() ==\n";
-ok($call('project') === 'tuchuang', '默认项目名 tuchuang');
+ok($call('project') === 'demoapp', '默认项目名 demoapp');
 $GLOBALS['__test_config']['upgrades.project'] = 'Bad_Name';
 expectException(fn () => $call('project'), '格式不正确', '非法项目名拒绝');
 $GLOBALS['__test_config']['upgrades.project'] = 'tuchuang';
@@ -112,19 +112,19 @@ $releaseId = str_repeat('b', 64);
 $release = [
     'id' => $releaseId, 'version' => '2.2.0', 'from' => '2.1.0',
     'sha256' => str_repeat('c', 64), 'size' => 100,
-    'download_url' => 'https://app.52okp.com/api/v1/projects/tuchuang/releases/'.$releaseId.'/package',
-    'manifest_url' => '/api/v1/projects/tuchuang/releases/'.$releaseId.'/manifest',
+    'download_url' => 'https://update.example.com/api/v1/projects/demoapp/releases/'.$releaseId.'/package',
+    'manifest_url' => '/api/v1/projects/demoapp/releases/'.$releaseId.'/manifest',
 ];
 ok($call('resolveUrl', '', $release, 'zip') === $release['download_url'], 'download_url 绝对地址通过');
-ok($call('resolveUrl', '/api/x', $release, 'zip') === 'https://app.52okp.com/api/x', '相对路径拼接 base_url');
-expectException(fn () => $call('resolveUrl', 'http://app.52okp.com/x', $release, 'zip'), 'https', 'http 地址拒绝');
+ok($call('resolveUrl', '/api/x', $release, 'zip') === 'https://update.example.com/api/x', '相对路径拼接 base_url');
+expectException(fn () => $call('resolveUrl', 'http://update.example.com/x', $release, 'zip'), 'https', 'http 地址拒绝');
 expectException(fn () => $call('resolveUrl', 'https://evil.com/x', $release, 'zip'), '自身', '外域地址拒绝');
 expectException(fn () => $call('resolveUrl', '', [], 'zip'), '下载地址', '无地址时报错');
 
 echo "== findAsset ==\n";
 $releaseWithAssets = array_merge($release, ['assets' => [
-    ['type' => 'zip', 'size' => 100, 'sha256' => 'aa', 'url' => 'https://app.52okp.com/z'],
-    ['type' => 'manifest', 'size' => 10, 'sha256' => 'bb', 'url' => 'https://app.52okp.com/m'],
+    ['type' => 'zip', 'size' => 100, 'sha256' => 'aa', 'url' => 'https://update.example.com/z'],
+    ['type' => 'manifest', 'size' => 10, 'sha256' => 'bb', 'url' => 'https://update.example.com/m'],
 ]]);
 ok(($call('findAsset', $releaseWithAssets, 'manifest'))['sha256'] === 'bb', '按 type 定位 manifest 资产');
 ok(is_null($call('findAsset', $release, 'manifest')), '无 assets 返回 null');
@@ -142,7 +142,7 @@ $mkZip = function (string $name, callable $builder) use ($tempDir): string {
     $zip->close();
     return $path;
 };
-$manifestOk = ['product' => 'tuchuang', 'version' => '2.2.0', 'from' => '2.1.0', 'sha256' => str_repeat('c', 64), 'size' => 1];
+$manifestOk = ['product' => 'demoapp', 'version' => '2.2.0', 'from' => '2.1.0', 'sha256' => str_repeat('c', 64), 'size' => 1];
 $releaseOk = array_merge($release, ['sha256' => str_repeat('c', 64), 'size' => 1]);
 
 $extractBase = base_path('storage/temp/extract');
@@ -154,7 +154,7 @@ if (is_dir($extractBase)) {
 
 // 1. 正常包
 $zip1 = $mkZip('normal', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('app/Test.php', '<?php // new');
     $z->addFromString('public/nested/dir/a.css', 'body{}');
     $z->addEmptyDir('storage');
@@ -166,7 +166,7 @@ ok(is_file($extractBase.'/app/Test.php'), '文件已解压到隔离目录');
 
 // 2. 路径穿越
 $zip2 = $mkZip('traversal', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('../evil.txt', 'x');
 });
 expectException(fn () => $call('extractPackage', $zip2, $releaseOk, $manifestOk), '路径穿越', '穿越条目拒绝');
@@ -174,14 +174,14 @@ ok(! file_exists(dirname($GLOBALS['__test_base']).'/evil.txt'), '穿越文件未
 
 // 3. 绝对路径
 $zip3 = $mkZip('absolute', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('/abs/evil.txt', 'x');
 });
 expectException(fn () => $call('extractPackage', $zip3, $releaseOk, $manifestOk), '绝对路径', '绝对路径条目拒绝');
 
 // 4. 反斜杠
 $zip4 = $mkZip('backslash', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('dir\\evil.txt', 'x');
 });
 expectException(fn () => $call('extractPackage', $zip4, $releaseOk, $manifestOk), '反斜杠', '反斜杠条目拒绝');
@@ -189,7 +189,7 @@ expectException(fn () => $call('extractPackage', $zip4, $releaseOk, $manifestOk)
 // 5. 单条目体积超限
 $GLOBALS['__test_config']['upgrades.max_entry_size'] = 4;
 $zip5 = $mkZip('toolarge', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('big.bin', str_repeat('A', 32));
 });
 expectException(fn () => $call('extractPackage', $zip5, $releaseOk, $manifestOk), '体积超出限制', '单条目体积超限拒绝');
@@ -198,7 +198,7 @@ $GLOBALS['__test_config']['upgrades.max_entry_size'] = 50 * 1024 * 1024;
 // 6. 总体积超限
 $GLOBALS['__test_config']['upgrades.max_extract_size'] = 16;
 $zip6 = $mkZip('totaltoolarge', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('a.bin', str_repeat('A', 8));
     $z->addFromString('b.bin', str_repeat('A', 8));
     $z->addFromString('c.bin', str_repeat('A', 8));
@@ -209,7 +209,7 @@ $GLOBALS['__test_config']['upgrades.max_extract_size'] = 1024 * 1024 * 1024;
 // 7. 条目数超限
 $GLOBALS['__test_config']['upgrades.max_zip_entries'] = 2;
 $zip7 = $mkZip('toomany', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('a.php', 'x');
     $z->addFromString('b.php', 'x');
 });
@@ -236,7 +236,7 @@ expectException(fn () => $call('extractPackage', $badPath, $releaseOk, $manifest
 
 // 11. .env / installed.lock 被排除
 $zip11 = $mkZip('withenv', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '2.2.0']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '2.2.0']));
     $z->addFromString('.env', 'APP_KEY=xxx');
     $z->addFromString('installed.lock', '');
     $z->addFromString('app/Real.php', '<?php');
@@ -246,7 +246,7 @@ ok($files11 === ['app/Real.php'], '.env/installed.lock 被排除不覆盖', json
 
 // 12. update-version.json 版本不符
 $zip12 = $mkZip('wrongversion', function ($z) {
-    $z->addFromString('update-version.json', json_encode(['product' => 'tuchuang', 'version' => '9.9.9']));
+    $z->addFromString('update-version.json', json_encode(['product' => 'demoapp', 'version' => '9.9.9']));
     $z->addFromString('a.php', 'x');
 });
 expectException(fn () => $call('extractPackage', $zip12, $releaseOk, $manifestOk), '不一致', 'update-version.json 版本不符拒绝');
