@@ -544,7 +544,12 @@ class UpgradeService
             throw new \Exception('UPDATES_TOKEN 格式不正确，应为 64 位小写十六进制字符串。');
         }
 
-        return Http::baseUrl(rtrim((string) config('upgrades.base_url'), '/'))
+        $baseUrl = rtrim((string) config('upgrades.base_url'), '/');
+        if ($baseUrl === '') {
+            throw new \Exception('未配置更新服务地址，请在 .env 中设置 UPDATES_BASE_URL。');
+        }
+
+        return Http::baseUrl($baseUrl)
             ->withToken($token)
             ->withOptions([
                 'allow_redirects' => false,
@@ -560,7 +565,10 @@ class UpgradeService
      */
     protected function project(): string
     {
-        $project = (string) config('upgrades.project');
+        $project = trim((string) config('upgrades.project'));
+        if ($project === '') {
+            throw new \Exception('未配置更新服务项目名，请在 .env 中设置 UPDATES_PROJECT。');
+        }
         if (! preg_match('/^[a-z][a-z0-9-]{1,47}$/', $project)) {
             throw new \Exception('UPDATES_PROJECT 项目名格式不正确（2-48 位小写字母/数字/连字符，字母开头）。');
         }

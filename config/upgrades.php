@@ -9,10 +9,10 @@ return [
     | 令牌只允许存放于服务器环境变量，禁止写入数据库、前端或代码仓库。
     */
 
-    'base_url' => env('UPDATES_BASE_URL', 'https://app.52okp.com'),
+    'base_url' => env('UPDATES_BASE_URL', ''),
 
     // 更新服务端登记的项目名：2-48 位小写字母/数字/连字符，字母开头
-    'project' => env('UPDATES_PROJECT', 'tuchuang'),
+    'project' => env('UPDATES_PROJECT', ''),
 
     // 更新通道，目前仅支持 stable
     'channel' => env('UPDATES_CHANNEL', 'stable'),
