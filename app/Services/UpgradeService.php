@@ -172,7 +172,8 @@ class UpgradeService
                 }
 
                 $this->setProgress('执行数据库迁移...');
-                Artisan::call('migrate', ['--seed' => true]);
+                // 生产环境必须带 --force，否则迁移命令会发起交互确认，网页上下文无 STDIN 会抛异常
+                Artisan::call('migrate', ['--force' => true, '--seed' => true]);
 
                 $this->setProgress('清除缓存...');
                 Artisan::call('optimize:clear');
