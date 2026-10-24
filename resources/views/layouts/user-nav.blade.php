@@ -1,3 +1,4 @@
+@if(Auth::check())
 <!-- Profile dropdown -->
 <x-dropdown>
     <x-slot name="trigger">
@@ -21,3 +22,9 @@
         </form>
     </x-slot>
 </x-dropdown>
+@else
+<a href="{{ route('login') }}" class="text-sm text-white hover:text-gray-300">登录</a>
+@if(\App\Utils::config(\App\Enums\ConfigKey::IsEnableRegistration))
+<a href="{{ route('register') }}" class="text-sm text-white hover:text-gray-300">注册</a>
+@endif
+@endif

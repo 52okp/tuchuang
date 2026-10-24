@@ -143,7 +143,7 @@
         <div class="flex items-center">
             <img id="icon" src="__icon__" alt="icon" class="rounded-full w-16" style="animation-duration: 5s">
             <div class="flex flex-col text-gray-700 ml-4">
-                <p class="font-semibold">Lsky Pro __name__</p>
+                <p class="font-semibold">{{ \App\Utils::config(\App\Enums\ConfigKey::AppName) }} __name__</p>
                 <p class="text-sm">__size__</p>
                 <p class="text-sm">发布于 __pushed_at__</p>
             </div>
@@ -243,6 +243,9 @@
                         $('#have-update').html(html).show();
                         $('.markdown-body a').attr('target', '_blank');
                         callback && callback(version);
+                    } else if (! response.data.status) {
+                        $('#check-update').hide();
+                        $('#not-update').show().addClass('text-red-500').text(response.data.message || '检查更新失败');
                     } else {
                         $('#not-update').show();
                         $('#check-update').hide();

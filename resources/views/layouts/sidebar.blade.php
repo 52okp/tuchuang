@@ -47,7 +47,7 @@
                 @endif
             </div>
             @endif
-            @if(Auth::user()->is_adminer)
+            @if(Auth::check() && Auth::user()->is_adminer)
             <div class="flex flex-col space-y-2 mb-5">
                 <p class="text-gray-400 text-sm mx-4">系统</p>
                 <x-nav-link :href="route('admin.console')" :active="request()->is('admin/console*')">
@@ -78,6 +78,7 @@
             @endif
         </div>
 
+        @if(Auth::check())
         <div id="capacity-progress" class="flex flex-col space-y-2 mb-5 px-5 w-full mt-10">
             <p class="text-gray-700 text-sm">容量使用</p>
             <progress class="w-full h-1.5" value="{{ Auth::user()->use_capacity }}" max="{{ Auth::user()->capacity }}"></progress>
@@ -87,6 +88,14 @@
                 <span class="total">{{ \App\Utils::formatSize(Auth::user()->capacity * 1024) }}</span>
             </p>
         </div>
+        @else
+        <div class="flex flex-col space-y-2 mb-5 px-5 w-full mt-10">
+            <a href="{{ route('login') }}" class="block text-center rounded-md px-4 py-2 bg-blue-500 text-white">登录</a>
+            @if(\App\Utils::config(\App\Enums\ConfigKey::IsEnableRegistration))
+            <a href="{{ route('register') }}" class="block text-center rounded-md px-4 py-2 border border-blue-500 text-blue-500">注册</a>
+            @endif
+        </div>
+        @endif
     </div>
 </nav>
 

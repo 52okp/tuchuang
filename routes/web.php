@@ -37,6 +37,14 @@ Route::get('/', fn () => view('welcome'))
 
 Route::any('install', [Controller::class, 'install'])->name('install');
 Route::post('upload', [Controller::class, 'upload']);
+// 接口说明页，游客可访问
+Route::group([
+    'prefix' => 'api',
+    'middleware' => CheckIsEnableApi::class
+], function () {
+    Route::get('', [ApiController::class, 'index'])->name('api');
+});
+
 Route::group(['middleware' => ['auth']], function () {
     Route::get('dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     Route::get('gallery', [GalleryController::class, 'index'])->middleware(CheckIsEnableGallery::class)->name('gallery');
@@ -45,13 +53,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('', [UserController::class, 'settings'])->name('settings');
         Route::put('', [UserController::class, 'update'])->name('settings.update');
         Route::put('set-strategy', [UserController::class, 'setStrategy'])->name('settings.strategy.set');
-    });
-
-    Route::group([
-        'prefix' => 'api',
-        'middleware' => CheckIsEnableApi::class
-    ], function () {
-        Route::get('', [ApiController::class, 'index'])->name('api');
     });
 
     Route::get('upload', fn () => view('user.upload'))->name('upload');
