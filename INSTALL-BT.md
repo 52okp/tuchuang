@@ -152,7 +152,10 @@ request_terminate_timeout = 0
 
 两种方式任选：
 
-**在线升级（可选）**：`.env` 里配置自备更新服务的 `UPDATES_BASE_URL` / `UPDATES_PROJECT` / `UPDATES_TOKEN` 后，后台 → 系统设置 → 系统升级 检查更新并一键安装。升级流程内置 SHA-256 完整性校验、安全解压校验、自动备份与失败回滚。未配置或无令牌时此功能不可用，不影响其他功能。
+**在线升级（可选）**：`.env` 里配置自备更新服务后，后台 → 系统设置 → 系统升级 检查更新并一键安装。升级流程内置 SHA-256 完整性校验、安全解压校验、自动备份与失败回滚。未配置或无令牌时此功能不可用，不影响其他功能。
+
+> [!IMPORTANT]
+> 启用在线升级时 `.env` 的三项**缺一不可**：`UPDATES_BASE_URL`（更新服务地址）、`UPDATES_PROJECT`（项目标识）、`UPDATES_TOKEN`（64 位项目令牌）。代码不提供任何默认值——只配了令牌、漏配地址或项目名，检查更新会分别提示"未配置更新服务地址/项目名"。换服务器部署时务必三项一起迁移。
 
 **手动升级**：从 GitHub [Releases](https://github.com/52okp/tuchuang/releases) 下载新版代码 → 覆盖站点目录（**保留** `.env`、`installed.lock`、`storage/app/uploads`）→ 执行：
 
