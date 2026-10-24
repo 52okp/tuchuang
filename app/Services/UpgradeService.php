@@ -138,11 +138,13 @@ class UpgradeService
     {
         try {
             if (file_exists(base_path($this->lock))) {
+                $this->setProgress('已有升级任务在执行，请稍候...', 'fail');
                 return false;
             }
 
             $release = $this->getRelease();
             if (is_null($release)) {
+                $this->setProgress('当前已是最新版本，无需升级', 'fail');
                 return false;
             }
 
